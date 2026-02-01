@@ -29,19 +29,24 @@ html_template = f"""
         img {{ width: 100%; height: 100%; object-fit: cover; cursor: pointer; }}
         .info {{ padding: 12px; font-size: 13px; text-align: center; border-top: 1px solid #30363d; }}
         .btn-group {{ display: flex; gap: 8px; margin-top: 8px; }}
-        .btn {{ flex: 1; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; text-decoration: none; text-align: center; }}
+        .btn {{ flex: 1; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 12px; text-decoration: none; text-align: center; display: inline-block; }}
         .copy-btn {{ background: #238636; }}
         .copy-btn:hover {{ background: #2ea043; }}
         .dl-btn {{ background: #2188ff; }}
         .dl-btn:hover {{ background: #0969da; }}
-        .ads-container {{ text-align: center; margin: 20px 0; min-height: 90px; background: #161b22; border-radius: 8px; }}
+        .ads-container {{ text-align: center; margin: 20px 0; min-height: 90px; }}
     </style>
 </head>
 <body>
-    <h1>🌌 我的超大容量壁纸库</h1>
+    <h1>🌌 我的壁纸库导航 (含下载)</h1>
     
     <div class="ads-container">
-        <ins class="adsbygoogle" style="display:block" data-ad-client="{PUBLISHER_ID}" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="{PUBLISHER_ID}"
+             data-ad-slot="auto"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
         <script> (adsbygoogle = window.adsbygoogle || []).push({{}}); </script>
     </div>
 
@@ -57,11 +62,17 @@ html_template = f"""
 """
 
 content = ""
-with open(input_file, 'r', encoding='utf-8') as f:
-    all_files = f.read().splitlines()
+# 读取虚拟列表
+try:
+    with open(input_file, 'r', encoding='utf-8') as f:
+        all_files = f.read().splitlines()
+except FileNotFoundError:
+    print(f"Error: {input_file} not found.")
+    sys.exit(1)
 
 for folder in IMAGE_DIRS:
     content += f"<h2>📂 分类: {folder}</h2><div class='grid'>"
+    # 筛选并排序
     target_files = sorted([f for f in all_files if f.startswith(folder) and f.lower().endswith(('.jpg', '.png', '.jpeg', '.webp'))])
     
     for rel_path in target_files:
@@ -75,12 +86,15 @@ for folder in IMAGE_DIRS:
             <div class="info">
                 <div title="{file_name}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{file_name}</div>
                 <div class="btn-group">
-                    <button class="btn copy-btn" onclick="copyUrl('{raw_url}')">复制</button>
-                    <a href="{raw_url}" download="{file_name}" target="_blank" class="btn dl-btn">下载</a>
+                    <button class="btn copy-btn" onclick="copyUrl('{raw_url}')">复制链接</button>
+                    <a href="{raw_url}" download="{file_name}" target="_blank" class="btn dl-btn">下载图片</a>
                 </div>
             </div>
         </div>"""
     content += "</div>"
 
+# 最终写入，此时 {{content}} 会被替换为真实的 HTML 内容
 with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
     f.write(html_template.format(content=content))
+
+print("✅ index.html 生成成功！")
