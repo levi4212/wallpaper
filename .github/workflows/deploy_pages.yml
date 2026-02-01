@@ -1,27 +1,33 @@
 name: Auto Deploy Wallpaper Gallery
 on:
   push:
-    branches:
-      - paper  # 监听你的主要图片分支
+    branches: [ paper ]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Sparse Checkout (Only metadata)
         uses: actions/checkout@v4
+        with:
+          # 关键：只获取最近一次提交，且不下载 LFS 文件
+          fetch-depth: 1
+          filter: blob:none 
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Generate Navigation Page
-        run: python .github/py/update_nav.py
+      - name: Generate Index
+        run: |
+          # 只列出文件结构，不下载内容
+          git ls-tree -r paper --name-only > files.txt
+          python .github/py/update_nav.py files.txt
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
-          publish_branch: gh-pages  # 页面文件会被推送到这个自动生成的分支
+          publish_branch: gh-pages
