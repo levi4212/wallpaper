@@ -99,3 +99,10 @@ with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
     f.write(html_head + content + html_foot)
 
 print("✅ index.html 已成功生成，包含下载按钮和 AdSense 代码。")
+
+# 自动生成 ads.txt 确保部署分支始终包含验证文件
+ADS_TXT_CONTENT = "google.com, pub-9823824864995295, DIRECT, f08c47fec0942fa0"
+with open('ads.txt', 'w', encoding='utf-8') as f:
+    f.write(ADS_TXT_CONTENT)
+
+print("✅ ads.txt 已同步生成！")
