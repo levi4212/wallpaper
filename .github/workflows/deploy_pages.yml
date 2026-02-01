@@ -1,7 +1,8 @@
 name: Auto Deploy Wallpaper Gallery
 on:
   push:
-    branches: [ paper ]
+    branches:
+      - paper  # 监听你的主要图片分支
 
 jobs:
   build:
@@ -10,7 +11,7 @@ jobs:
       - name: Sparse Checkout (Only metadata)
         uses: actions/checkout@v4
         with:
-          # 关键：只获取最近一次提交，且不下载 LFS 文件
+          # 关键：不下载 40GB 文件内容，仅获取文件树
           fetch-depth: 1
           filter: blob:none 
 
@@ -21,13 +22,26 @@ jobs:
 
       - name: Generate Index
         run: |
-          # 只列出文件结构，不下载内容
+          # 1. 生成云端文件树列表
           git ls-tree -r paper --name-only > files.txt
+          # 2. 运行你放在 .github/py 下的脚本 [cite: 1, 3]
           python .github/py/update_nav.py files.txt
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          publish_branch: gh-pages
+      - name: Deploy to GitHub Pages (Manual Push Mode)
+        run: |
+          # 手动配置 Git，解决 "No such remote: origin" 问题
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 创建一个临时的孤立分支用于存放 index.html
+          git checkout --orphan gh-pages
+          git rm -rf . --cached > /dev/null
+          
+          # 仅添加生成的导航页和必要文件
+          git add index.html
+          
+          # 提交并强制推送到 gh-pages 分支
+          git commit -m "Auto-update gallery page"
+          git push origin gh-pages --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
