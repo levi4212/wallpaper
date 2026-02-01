@@ -18,7 +18,7 @@ html_head = f"""
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallpapers Gallery (40GB Mode)</title>
+    <title>Wallpapers Gallery</title>
     <script async src="{ADS_JS}" crossorigin="anonymous"></script>
     <style>
         body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; margin: 0; }}
@@ -40,7 +40,7 @@ html_head = f"""
     </style>
 </head>
 <body>
-    <h1>🌌 我的壁纸库导航 (含下载与广告)</h1>
+    <h1>我的壁纸库</h1>
     <div class="ads-container">
         <ins class="adsbygoogle"
              style="display:block"
