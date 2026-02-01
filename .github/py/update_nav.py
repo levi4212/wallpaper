@@ -1,6 +1,7 @@
 import sys
 import os
 
+# 配置信息
 input_file = sys.argv[1] if len(sys.argv) > 1 else 'files.txt'
 OUTPUT_FILE = 'index.html'
 REPO_BASE_URL = "https://raw.githubusercontent.com/levi4212/wallpaper/paper/"
@@ -10,7 +11,8 @@ IMAGE_DIRS = ('4K16-10', '4KStandard', '4KUltraWide')
 ADS_JS = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9823824864995295"
 PUBLISHER_ID = "ca-pub-9823824864995295"
 
-html_template = f"""
+# 使用普通字符串拼接，避免 f-string 误解析 CSS 的花括号
+html_head = f"""
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -38,8 +40,7 @@ html_template = f"""
     </style>
 </head>
 <body>
-    <h1>🌌 我的壁纸库导航 (含下载)</h1>
-    
+    <h1>🌌 我的壁纸库导航 (含下载与广告)</h1>
     <div class="ads-container">
         <ins class="adsbygoogle"
              style="display:block"
@@ -49,20 +50,20 @@ html_template = f"""
              data-full-width-responsive="true"></ins>
         <script> (adsbygoogle = window.adsbygoogle || []).push({{}}); </script>
     </div>
+"""
 
-    {{content}}
-
+html_foot = """
     <script>
-        function copyUrl(url) {{
+        function copyUrl(url) {
             navigator.clipboard.writeText(url).then(() => alert('图片链接已复制！'));
-        }}
+        }
     </script>
 </body>
 </html>
 """
 
+# 处理内容
 content = ""
-# 读取虚拟列表
 try:
     with open(input_file, 'r', encoding='utf-8') as f:
         all_files = f.read().splitlines()
@@ -72,7 +73,7 @@ except FileNotFoundError:
 
 for folder in IMAGE_DIRS:
     content += f"<h2>📂 分类: {folder}</h2><div class='grid'>"
-    # 筛选并排序
+    # 筛选对应目录下的图片并排序
     target_files = sorted([f for f in all_files if f.startswith(folder) and f.lower().endswith(('.jpg', '.png', '.jpeg', '.webp'))])
     
     for rel_path in target_files:
@@ -93,8 +94,8 @@ for folder in IMAGE_DIRS:
         </div>"""
     content += "</div>"
 
-# 最终写入，此时 {{content}} 会被替换为真实的 HTML 内容
+# 写入文件
 with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-    f.write(html_template.format(content=content))
+    f.write(html_head + content + html_foot)
 
-print("✅ index.html 生成成功！")
+print("✅ index.html 已成功生成，包含下载按钮和 AdSense 代码。")
